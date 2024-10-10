@@ -1,0 +1,21 @@
+---
+- name: Install necessary packages for the Flask app
+  hosts: local
+  become: true
+
+  tasks:
+   - name: Install Python and pip
+     apt:
+      name:
+       - python3
+       - python3-pip
+      state: present
+      update_cache: true
+
+   - name: Install Python packages
+     pip:
+      name:
+       - Flask==2.0.3
+       - requests==2.26.0
+       - SQLAlchemy==1.4.22
+---       
