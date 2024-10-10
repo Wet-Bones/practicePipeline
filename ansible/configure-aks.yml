@@ -1,21 +1,20 @@
 ---
-- name: Install necessary packages for the Flask app
-  hosts: local
+- name: Configure AKS nodes
+  hosts: azure_vm_group
   become: true
-
+  
   tasks:
-   - name: Install Python and pip
+   - name: Install necessary tools on AKS nodes
      apt:
       name:
-       - python3
-       - python3-pip
+       - htop
+       - curl
+       - net-tools
       state: present
-      update_cache: true
 
-   - name: Install Python packages
-     pip:
-      name:
-       - Flask==2.0.3
-       - requests==2.26.0
-       - SQLAlchemy==1.4.22
+   - name: Set up environment variables
+     copy:
+        dest: /etc/environment
+        content: |
+         FLASK_ENV=production
 ---       
