@@ -30,4 +30,10 @@ module "cluster1" {
 	resource_group_name = azurerm_resource_group.rg01.name
 	location = azurerm_resource_group.rg01.location
 }
+
+module "vm1" {
+	source = "./vm"
+	resource_group_name = azurerm_resource_group.rg01.name
+	location = azurerm_resource_group.rg01.location
+}
 	

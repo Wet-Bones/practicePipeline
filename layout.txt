@@ -1,0 +1,14 @@
+Jenkins: CI/CD pipeline that triggers Terraform to provision infrastructure and Ansible.
+Terraform: Provisions Azure infrastructure (AKS cluster, Azure Container Registry, and VMs).
+Ansible: After Terraform provisioning, Ansible handles:
+Docker installation and configuration on VMs.
+Building Docker images from the Flask application.
+Pushing Docker images to Azure Container Registry (ACR).
+Kubernetes (AKS): AKS cluster deployed by Terraform, where the application will be run.
+ArgoCD: Handles deployment from ACR to the AKS cluster.
+
+running pipeline:
+Trigger the pipeline in Jenkins.
+Terraform provisions the infrastructure, including Ansible VMs.
+Ansible installs Docker, builds the Flask app image, and pushes it to ACR.
+ArgoCD picks up the new image from ACR and deploys it to the AKS cluster.

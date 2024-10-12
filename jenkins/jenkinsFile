@@ -1,40 +1,48 @@
 pipeline{
 	agent any
-
-	environment {
-		REGISTRY = "myContainerRegistry.azurecr.io"
-		IMAGE_NAME = "flask-app"
-		DOCKER_CREDENTIAL_ID = "acr-service-principal"
-	}
-
 	stages {
-		stage('Clone repository') {
+		stage('Terraform Init and Apply') {
 			steps {
-				git 'https://github.com/Wet-Bones/practicePipeline.git'
+				sh 'terraform init'
+				sh 'terraform apply -auto-approve'
 			}
 		}
-
-		stage('Navigate to Subdirectory') {
-			steps {
-				dir('python_app')
-			}
-		}
-
-		stage('Build Docker image') {
+		stage('Retrieve Azure Credentials') {
 			steps {
 				script {
-					dockerImage = docker.build("${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}")
+					env.AZURE_CLIENT_ID = sh(script: 'terraform output -raw azure_client_id', returnStdout: true).trim()
+					env.AZURE_CLIENT_SECRET = sh(script: 'terraform output -raw azure_client_secret', returnStdout: true).trim()
+					env.AZURE_TENANT_ID = sh(script: 'terraform output -raw azure_tenant_id', returnStdout: true).trim()
+					env.AZURE_SUBSCRIPTION_ID = sh(script: 'terraform output -raw azure_subscription_id'. returnStdout: true).trim()
+					env.ACR_NAME = sh(script: 'terraform output -raw acr_name', returnStdout: true).trim()
+					env.ACR_LOGIN_SERVER = "${env.ACR_NAME}.azurecr.io"		
 				}
 			}
 		}
-
-		stage('Push Docker image to ACR') {
+		stage('Run Ansible Playbook') {
 			steps {
-				script {
-					docker.withRegistry("https://${REGISTRY}", "${DOCKER_CREDENTIAL_ID}") {
-						dockerImage.push()
-					}
+				sshagent(['87619e79-ebdd-42b3-a761-b77eff6b2992']) {
+					sh """
+						ansible-playbook - i ../ansible/inventory.imi ../ansible/playbook.yml --extra-vars '
+						azure_client_id=${AZURE_CLIENT_ID}
+						azure_client_secret=${AZURE_CLIENT_SECRET}
+						azure_tenant_id=${AZURE_TENANT_ID}
+						azure_subscription_id=${AZURE_SUBSCRIPTION_ID}'
+					"""	
 				}
+			}
+		}
+		stage('Prepare Kubernetes Deployment') {
+			steps{
+				script{
+					sh """
+					sed -i 's|PLACEHOLDER_IMAGE|${ACR_NAME}.azurecr.io/your-app:latest|g' deployment.yaml
+				}
+			}
+		}
+		stage('Deploy to AKS via ArgoCD') {
+			steps {
+				sh 'argocd app sync flask-app'
 			}
 		}
 	}

@@ -1,4 +1,3 @@
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,6 +14,7 @@ spec:
             spec:
                 containers:
                     - name: flask-app
-                      image: myContainerRegistry.azure.io/flask-app:latest
+                    #will be injected via jenkinsFile
+                      image: PLACEHOLDER_IMAGE
                       ports:
                       - containerPort: 5000

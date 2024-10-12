@@ -29,3 +29,30 @@ resource "azurerm_container_registry" "acr" {
 	location			= var.location
 	sku					= "Basic"
 }
+
+output "acr_name" {
+	value = azurerm_container_registry.acr.name
+	description = "name of Azure Container Registry"
+}
+
+output "azure_client_id" {
+	value = azurerm_client_config.current.client_id
+	description = "Azure Client ID"
+}
+
+output "azure_client_secret" {
+	value = azurerm_client_config.current.client_secret
+	description = "Azure Client Secret"
+	sensitive = true 
+}
+
+output "azure_tenant_id" {
+	value = azurerm_client_config.current.tenant_id
+	description = "Azure Tenant ID"
+}
+
+output "azure_subscription_id" {
+	value = azurerm_client_config.current.subscription_id
+	description = "Azure Subscription ID"
+}
+

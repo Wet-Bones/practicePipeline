@@ -1,0 +1,40 @@
+---
+- hosts: all
+  become: true
+  tasks: 
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Start Docker Service
+      service: 
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Install Docker Python module
+      pip: 
+        name: docker
+        state: present
+
+    - name: Build Docker image for Flask app
+      docker_image:
+        path: ../python_app/app.py
+        name: flask-app-image
+        tag: latest
+        
+    #all the vars inputted below should be coming in via Jenkins
+    - name: Log in to Azure Container Registry
+      shell: az acr login --name "{{ acr_name }}"
+      environment:
+        AZURE_CLIENT_ID: "{{ azure_client_id }}"
+        AZURE_SECRET: "{{ azure_secret }}"
+        AZURE_TENANT: "{{ azure_tenant }}"
+
+    - name: Pusher Docker image to ACR
+      docker_image:
+        name: flask-app-image
+        tag: latest
+        push: true
+        repository: "{{ acr_name }}.azurecr.io/flask-app-image"
