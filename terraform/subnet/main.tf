@@ -11,8 +11,10 @@ resource "azurerm_subnet" "snet1" {
 	resource_group_name	= var.resource_group_name
 	virtual_network_name	= var.vnet-name
 	address_prefixes	= var.subnet_CIDR
+
+	depends_on = [azurerm_virtual_network.vnet1]
 }
 
-output "sub_id" {
+output "subnet_id" {
 	value = azurerm_subnet.snet1.id
 }

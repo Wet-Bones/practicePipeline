@@ -28,9 +28,9 @@
     - name: Log in to Azure Container Registry
       shell: az acr login --name "{{ acr_name }}"
       environment:
-        AZURE_CLIENT_ID: "{{ azure_client_id }}"
-        AZURE_SECRET: "{{ azure_secret }}"
-        AZURE_TENANT: "{{ azure_tenant }}"
+        AZURE_CLIENT_ID: "{{ lookup('env', 'AZURE_CLIENT_ID') }}"
+        AZURE_SECRET: "{{ lookup('env', 'AZURE_CLIENT_SECRET') }}"
+        AZURE_TENANT: "{{ lookup('env', 'AZURE_TENANT_ID') }}"
 
     - name: Pusher Docker image to ACR
       docker_image:

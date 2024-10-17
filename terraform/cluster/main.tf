@@ -10,8 +10,8 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
 
 	default_node_pool {
 		name		= "default"
-		node_count  = 2
-		vm_size		= "Standard_D2pls_v5"
+		node_count  = 1
+		vm_size		= "Standard_D2s_v3"
 	}
 
 	identity {
@@ -30,29 +30,25 @@ resource "azurerm_container_registry" "acr" {
 	sku					= "Basic"
 }
 
+data "azurerm_client_config" "current" {}
+
 output "acr_name" {
 	value = azurerm_container_registry.acr.name
 	description = "name of Azure Container Registry"
 }
 
 output "azure_client_id" {
-	value = azurerm_client_config.current.client_id
+	value = data.azurerm_client_config.current.client_id
 	description = "Azure Client ID"
 }
 
-output "azure_client_secret" {
-	value = azurerm_client_config.current.client_secret
-	description = "Azure Client Secret"
-	sensitive = true 
-}
-
 output "azure_tenant_id" {
-	value = azurerm_client_config.current.tenant_id
+	value = data.azurerm_client_config.current.tenant_id
 	description = "Azure Tenant ID"
 }
 
 output "azure_subscription_id" {
-	value = azurerm_client_config.current.subscription_id
+	value = data.azurerm_client_config.current.subscription_id
 	description = "Azure Subscription ID"
 }
 

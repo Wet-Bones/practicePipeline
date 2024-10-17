@@ -13,7 +13,7 @@ provider "azurerm" {
 
 resource "azurerm_resource_group" "rg01" {
 	name = "rg01"
-	location = "East US"
+	location = "East US 2"
 }
 
 module "sub1" {
@@ -35,5 +35,6 @@ module "vm1" {
 	source = "./vm"
 	resource_group_name = azurerm_resource_group.rg01.name
 	location = azurerm_resource_group.rg01.location
+	subnet_id = module.sub1.subnet_id
 }
 	
