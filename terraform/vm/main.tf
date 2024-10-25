@@ -84,9 +84,23 @@ resource "null_resource" "ansible_provision" {
 			"cat /home/ansibleadmin/playbook.yml",
 			"sudo apt-get update",
 			"sudo apt-get install -y ansible",
-			"ansible-playbook /home/ansibleadmin/playbook.yml"
+			"ansible-playbook /home/ansibleadmin/playbook.yml",
+			"mkdir -p /home/ansibleadmin/python_app/",
+			"ls -la /home/ansibleadmin"
 		]
 	}
+
+	provisioner "file" {
+			source		= "/home/nathaniel/practice_pipeline/python_app/"
+			destination = "/home/ansibleadmin/python_app/"
+	
+			connection {
+				type = "ssh"
+				user = "ansibleadmin"
+				private_key = file("/home/nathaniel/.ssh/id_ed25519")
+				host = azurerm_public_ip.vm_public_ip.ip_address
+			}
+		}
 }
 
 output "vm_public_ip" {

@@ -1,7 +1,13 @@
 ---
 - hosts: all
   become: true
-  tasks: 
+  tasks:
+    - name: Install pip3
+      apt:
+        name: python3-pip
+        state: present
+      become: yes
+      
     - name: Install Docker
       apt:
         name: docker.io
@@ -18,23 +24,91 @@
         name: docker
         state: present
 
+    - name: Ensure Docker is running
+      service:
+        name: docker
+        state: started
+        enabled: true
+    
+
     - name: Build Docker image for Flask app
       docker_image:
-        path: ../python_app/app.py
         name: flask-app-image
         tag: latest
+        source: build
+        build:
+            path: /home/ansibleadmin/python_app
+            dockerfile: dockerfile
+
+    - name: Tag Docker image for ACR
+      shell: docker tag flask-app-image:latest "{{ acr_name }}.azurecr.io/flask-app-image:latest"        
+
+    - name: Debug Docker images
+      command: docker images        
+
+    - name: Install dependencies for Azure CLI
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: present
+
+    - name: Add Microsoft signing key
+      apt_key:
+        url: https://packages.microsoft.com/keys/microsoft.asc
+        state: present
+
+    - name: Add Azure CLI software repository
+      apt_repository:
+        repo: "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ bionic main"
+        state: present       
+
+    - name: Install Azure CLI
+      apt:
+        name: azure-cli=2.0.81-1~bionic
+        state: present
+
+    - name: Debug Azure credentials
+      debug:
+        msg: 
+            -  "Client ID: {{ azure_client_id }}"
+            -  "Tenant ID: {{ azure_tenant_id }}"
+            -  "ACR Name: {{ acr_name }}"
+
+     # Authenticate with Azure using Service Principal
+    - name: Log in to Azure
+      shell: |
+        az login --service-principal \
+          --username "{{ azure_client_id }}" \
+          --password "{{ azure_client_secret }}" \
+          --tenant "{{ azure_tenant_id }}"
+      environment:
+        AZURE_CLIENT_ID: "{{ azure_client_id }}"
+        AZURE_SECRET: "{{ azure_client_secret }}"
+        AZURE_TENANT: "{{ azure_tenant_id }}"            
         
     #all the vars inputted below should be coming in via Jenkins
     - name: Log in to Azure Container Registry
-      shell: az acr login --name "{{ acr_name }}"
+      shell: |
+          set -o errexit
+          for i in {1..5}; do
+            az acr login --name "{{ acr_name }}" && break || sleep 10
+          done
       environment:
-        AZURE_CLIENT_ID: "{{ lookup('env', 'AZURE_CLIENT_ID') }}"
-        AZURE_SECRET: "{{ lookup('env', 'AZURE_CLIENT_SECRET') }}"
-        AZURE_TENANT: "{{ lookup('env', 'AZURE_TENANT_ID') }}"
+        AZURE_CLIENT_ID: "{{ azure_client_id }}"
+        AZURE_SECRET: "{{ azure_client_secret }}"
+        AZURE_TENANT: "{{ azure_tenant_id }}"
+
+    - name: Debug Azure ACR login
+      shell: az acr repository list --name "{{ acr_name }}"
+    
 
     - name: Pusher Docker image to ACR
       docker_image:
-        name: flask-app-image
+        name: "{{ acr_name }}.azurecr.io/flask-app-image"
         tag: latest
         push: true
+        source: local
         repository: "{{ acr_name }}.azurecr.io/flask-app-image"

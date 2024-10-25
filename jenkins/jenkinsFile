@@ -6,6 +6,7 @@ pipeline {
     	ARM_CLIENT_SECRET	= credentials('azure-client-secret')
     	ARM_SUBSCRIPTION_ID = credentials('azure-subscription-id')
     	ARM_TENANT_ID		= credentials('azure-tenant-id')
+    	ACR_NAME			= credentials('acr-name')
     }
     
     stages {
@@ -41,11 +42,12 @@ pipeline {
             steps {
                 sshagent(['87619e79-ebdd-42b3-a761-b77eff6b2992']) {
                     sh """
-                        ansible-playbook -i ../ansible/inventory.ini ../ansible/playbook.yml --extra-vars '
+                        ansible-playbook -i /home/nathaniel/practice_pipeline/ansible/inventory.ini /home/nathaniel/practice_pipeline/ansible/playbook.yml --extra-vars '
                         azure_client_id=${ARM_CLIENT_ID}
                         azure_client_secret=${ARM_CLIENT_SECRET}
                         azure_tenant_id=${ARM_TENANT_ID}
-                        azure_subscription_id=${ARM_SUBSCRIPTION_ID}'
+                        azure_subscription_id=${ARM_SUBSCRIPTION_ID}
+                        acr_name=${ACR_NAME}'
                     """
                 }
             }
@@ -53,7 +55,7 @@ pipeline {
         stage('Prepare Kubernetes Deployment') {
             steps {
                 script {
-                    sh "sed -i 's|PLACEHOLDER_IMAGE|${ACR_NAME}.azurecr.io/your-app:latest|g' deployment.yaml"
+                    sh "sed -i 's|PLACEHOLDER_IMAGE|${ACR_NAME}.azurecr.io/your-app:latest|g' /home/nathaniel/practice_pipeline/manifests/deployment.yaml"
                 }
             }
         }

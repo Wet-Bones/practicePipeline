@@ -15,6 +15,6 @@ spec:
                 containers:
                     - name: flask-app
                     #will be injected via jenkinsFile
-                      image: PLACEHOLDER_IMAGE
+                      image: testcontainerregistrye83a3d39.azurecr.io/your-app:latest
                       ports:
                       - containerPort: 5000
