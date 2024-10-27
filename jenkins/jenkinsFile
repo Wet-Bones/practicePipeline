@@ -61,7 +61,7 @@ pipeline {
         }
         stage('Deploy to AKS via ArgoCD') {
             steps {
-                sh 'argocd app sync flask-app'
+                sh 'argocd app sync flask-app --server 135.224.240.154 --insecure'
             }
         }
     }

@@ -9,7 +9,7 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    repoURL: 'https://https://github.com/Wet-Bones/practicePipeline/tree/main/manifests'
+    repoURL: 'https://github.com/Wet-Bones/practicePipeline/tree/main/manifests'
     targetRevision: HEAD
     path: 'manifests'
   syncPolicy:
