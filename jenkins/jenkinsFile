@@ -55,10 +55,11 @@ pipeline {
         stage('Prepare Kubernetes Deployment') {
             steps {
                 script {
-                    sh "sed -i 's|PLACEHOLDER_IMAGE|${ACR_NAME}.azurecr.io/your-app:latest|g' /home/nathaniel/practice_pipeline/manifests/deployment.yaml"
+                    sh "sed -i 's|PLACEHOLDER_IMAGE|${ACR_NAME}.azurecr.io/flask-app-image:latest|g' /home/nathaniel/practice_pipeline/manifests/deployment.yaml"
                 }
             }
         }
+        
         stage('Deploy to AKS via ArgoCD') {
             steps {
 				// Login to Argo CD
