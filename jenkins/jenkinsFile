@@ -61,6 +61,9 @@ pipeline {
         }
         stage('Deploy to AKS via ArgoCD') {
             steps {
+				// Login to Argo CD
+                sh 'argocd login 135.224.240.154 --username admin --password  54Z20KwcnLgaoUpR --insecure'
+            		
                 sh 'argocd app sync flask-app --server 135.224.240.154 --insecure'
             }
         }
