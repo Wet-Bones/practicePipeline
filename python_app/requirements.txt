@@ -1,5 +1,6 @@
+Werkzeug==2.2.2
 Flask==2.2.2
-SQLAlchemy==1.4.27
+Flask_SQLAlchemy
 requests>=2.25,<3.0
 pyyaml>=5.4.1
 

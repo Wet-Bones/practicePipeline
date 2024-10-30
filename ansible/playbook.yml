@@ -13,6 +13,11 @@
         name: docker.io
         state: present
 
+    - name: Install Flask
+      pip: 
+       name: Flask
+       state: present
+
     - name: Start Docker Service
       service: 
         name: docker
